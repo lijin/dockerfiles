@@ -9,3 +9,5 @@ ENV LANG en_US.UTF-8
 # No need for recommended packages:
 #  krb5-locales icedtea-7-jre-cacao icedtea-7-jre-jamvm
 RUN apt-get install -y --no-install-recommends openjdk-7-jre-headless
+
+ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
