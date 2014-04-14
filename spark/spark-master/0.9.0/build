@@ -1,0 +1,1 @@
+sudo docker build -t lijin/spark-master:0.9.0 .

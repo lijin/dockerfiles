@@ -1,0 +1,16 @@
+#!/bin/bash
+
+env
+
+IP=$(ip -o -4 addr list eth0 | perl -n -e 'if (m{inet\s([\d\.]+)\/\d+\s}xms) { print $1 }')
+echo "Container IP=$IP"
+
+# Start Spark Worker
+echo "starting Spark Worker"
+$SPARK_HOME/bin/spark-class org.apache.spark.deploy.worker.Worker spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
+
+while [ 1 ];
+do
+	tail -f $SPARK_HOME/logs/*.out
+        sleep 10
+done
