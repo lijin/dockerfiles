@@ -2,9 +2,6 @@
 # Installs https://github.com/bpaquet/dnsmasq-rest-api
 # Based on https://github.com/amp/lab/docker-scripts/dnsmasq-precise
 #
-# Usage: IP=$(ip -o -4 addr list eth0 | perl -n -e 'if (m{inet\s([\d\.]+)\/\d+\s}xms) { print $1 }')
-#        sudo docker run -p 80:80 -p $IP:53:53 -p $IP:53:53/udp -d lijin/dnsmasq-rest-api:precise
-#
 FROM ubuntu:precise
 
 RUN echo "deb http://au.archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
