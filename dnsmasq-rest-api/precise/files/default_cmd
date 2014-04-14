@@ -1,0 +1,12 @@
+#!/bin/bash
+
+IP=$(ip -o -4 addr list eth0 | perl -n -e 'if (m{inet\s([\d\.]+)\/\d+\s}xms) { print $1 }')
+echo "NAMESERVER_IP=$IP"
+
+service dnsmasq start
+service apache2 start
+
+while [ 1 ];
+do
+    sleep 3
+done
