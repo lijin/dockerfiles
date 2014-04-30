@@ -1,0 +1,24 @@
+#!/bin/bash
+
+env
+
+/usr/sbin/sshd
+
+IP=$(ip -o -4 addr list eth0 | perl -n -e 'if (m{inet\s([\d\.]+)\/\d+\s}xms) { print $1 }')
+echo "Container IP=$IP"
+
+# Update DNS
+curl -X DELETE http://$DNS_SERVER/dnsmasq-rest-api/zones/myZone
+#curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/zones/myZone/$PUBLIC_IP/$HOSTNAME
+curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/zones/myZone/$IP/$HOSTNAME
+curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/reload
+
+# Start Spark Master
+echo "starting Spark Master"
+$SPARK_HOME/sbin/start-master.sh
+
+while [ 1 ];
+do
+	tail -f $SPARK_HOME/logs/*.out
+        sleep 10
+done
