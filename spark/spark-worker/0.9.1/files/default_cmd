@@ -15,7 +15,7 @@ curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/reload
 
 # Start Spark Worker
 echo "starting Spark Worker"
-ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+#ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 $SPARK_HOME/sbin/start-slave.sh 1 spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
 
 while [ 1 ];
