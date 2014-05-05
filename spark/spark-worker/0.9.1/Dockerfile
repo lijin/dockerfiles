@@ -9,15 +9,12 @@ FROM lijin/spark-base:0.9.1
 # ENV SPARK_WORKER_INSTANCES
 # ENV SPARK_WORKER_DIR
 
-# See spark-master
-ENV SPARK_MASTER_PORT 7077
-ENV SPARK_MASTER_WEBUI_PORT 8080
-
 # Override the following
 # ENV SPARK_MASTER_IP
+# ENV SPARK_MASTER_PORT
 # ENV SPARK_PUBLIC_DNS
 
-# Override and bind the worker to a specific port
+# Override and bind the worker to the specified ports
 # ENV SPARK_WORKER_PORT
 # ENV SPARK_WORKER_WEBUI_PORT
 
