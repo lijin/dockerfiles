@@ -1,0 +1,22 @@
+#!/bin/bash
+
+env
+
+/usr/sbin/sshd
+
+IP=$(ip -o -4 addr list eth0 | perl -n -e 'if (m{inet\s([\d\.]+)\/\d+\s}xms) { print $1 }')
+echo "Container IP=$IP"
+
+# Update DNS
+#curl -X DELETE http://$DNS_SERVER/dnsmasq-rest-api/zones/myZone
+curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/zones/myZone/$IP/`hostname -f`
+curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/reload
+
+# Start Spark application example: SparkPi
+echo "starting SparkPi"
+$SPARK_HOME/bin/run-example org.apache.spark.examples.SparkPi spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
+
+while [ 1 ];
+do
+        sleep 10
+done
