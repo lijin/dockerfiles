@@ -19,7 +19,7 @@ FROM lijin/spark-base:0.9.1
 # ENV SPARK_WORKER_WEBUI_PORT
 
 # Optional
-# ENV SPARK_LOCAL_IP
+# ENV SPARK_LOCAL_IP # Required if hostname resolves to public IP
 # ENV SPARK_JAVA_OPTS
 
 ADD files /root/spark_worker_files

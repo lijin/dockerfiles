@@ -11,10 +11,8 @@ FROM lijin/spark-base:0.9.1
 # ENV SPARK_MASTER_WEBUI_PORT 8080
 
 # Optional
+# ENV SPARK_LOCAL_IP # Required if hostname resolves to public IP
 # ENV SPARK_JAVA_OPTS
-
-# Not used
-# ENV SPARK_LOCAL_IP
 
 ADD files /root/spark_master_files
 
