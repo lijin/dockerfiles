@@ -8,7 +8,7 @@ Usage
 
 Start [dnsmasq-rest-api](https://index.docker.io/u/lijin/dnsmasq-rest-api/) server.
 
-Start [spark-master](../../spark-master)
+Start [spark-master](../spark-master)
 
 * Set `DNS_SERVER` to the IP address of the dnsmasq server.
 * Set `MASTER_FQDN`, e.g. "master.spark.cluster".
@@ -17,7 +17,7 @@ Start [spark-master](../../spark-master)
 * Set `SPARK_WORKER_PORT`, e.g. "56800".
 * Set `SPARK_WORKER_WEBUI_PORT`, e.g. "8081".
 
-```Shell
+```bash
 $ DNS_SERVER=
 $ MASTER_FQDN=
 $ SPARK_MASTER_PORT=

@@ -14,7 +14,7 @@ Start [dnsmasq-rest-api](https://index.docker.io/u/lijin/dnsmasq-rest-api/) serv
 * Set `SPARK_MASTER_WEBUI_PORT`, e.g. "8080".
 * Set `SPARK_PUBLIC_DNS`, e.g. "\`curl http://169.254.169.254/latest/meta-data/public-hostname`".
 
-```Shell
+```bash
 $ DNS_SERVER=
 $ MASTER_FQDN=
 $ SPARK_MASTER_PORT=
