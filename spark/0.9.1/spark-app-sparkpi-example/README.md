@@ -1,4 +1,4 @@
-spark-app-example-sparkpi
+spark-app-sparkpi-example
 ============
 
 Image for Spark application example: SparkPi.
@@ -8,9 +8,9 @@ Usage
 
 Start [dnsmasq-rest-api](https://index.docker.io/u/lijin/dnsmasq-rest-api/) server.
 
-Start [spark-master](../../spark-master)
+Start [spark-master](../spark-master)
 
-Start [spark-worker](../../spark-worker)
+Start [spark-worker](../spark-worker)
 
 * Set `DNS_SERVER` to the IP address of the dnsmasq server.
 * Set `MASTER_FQDN`, e.g. "master.spark.cluster".
@@ -32,5 +32,5 @@ $ sudo docker run -d\
   -e "SPARK_PUBLIC_DNS=$SPARK_PUBLIC_DNS"\
   -e "SPARK_JAVA_OPTS=$SPARK_JAVA_OPTS"\
   -p $SPARK_UI_PORT:$SPARK_UI_PORT\
-  lijin/spark-app-example-sparkpi:0.9.1
+  lijin/spark-app-sparkpi-example:0.9.1
 ```
