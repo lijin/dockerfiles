@@ -1,1 +1,1 @@
-sudo docker build -t lijin/spark-app-example-sparkpi:0.9.1 .
+sudo docker build -t lijin/spark-app-sparkpi-example:0.9.1 .
