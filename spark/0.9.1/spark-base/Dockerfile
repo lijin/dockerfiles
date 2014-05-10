@@ -23,10 +23,11 @@ ADD files /root/spark_files
 RUN cd / && cp /root/spark_files/log4j.properties /opt/spark-$SPARK_VERSION/conf/
 
 # sshd
-#RUN apt-get install -y openssh-server
-#RUN mkdir /var/run/sshd
-#RUN echo 'root:password' |chpasswd
+RUN apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
+RUN echo 'root:password' |chpasswd
 
 #EXPOSE 22
+ENV SSHD_PORT 22
 
-#CMD    /usr/sbin/sshd -D
+CMD    /usr/sbin/sshd -p $SSHD_PORT -D
