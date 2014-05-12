@@ -22,12 +22,12 @@ RUN (cd / && wget -q http://d3kbcqa49mib13.cloudfront.net/spark-$SPARK_VERSION-b
 ADD files /root/spark_files
 RUN cd / && cp /root/spark_files/log4j.properties /opt/spark-$SPARK_VERSION/conf/
 
-# sshd
+# Setup sshd
 RUN apt-get install -y openssh-server
 RUN mkdir /var/run/sshd
 RUN echo 'root:password' |chpasswd
 
-#EXPOSE 22
+# Override if required (e.g. using net=host)
 ENV SSHD_PORT 22
 
 CMD    /usr/sbin/sshd -p $SSHD_PORT -D
