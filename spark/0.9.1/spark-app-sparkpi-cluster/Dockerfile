@@ -1,4 +1,4 @@
-# Spark application example: SparkPi
+# Spark standalone application SparkPi in cluster deploy mode
 #
 FROM lijin/spark-base:0.9.1
 
@@ -13,6 +13,6 @@ FROM lijin/spark-base:0.9.1
 # Not used
 # ENV SPARK_LOCAL_IP
 
-ADD files /root/spark_app_example_sparkpi_oncluster_files
+ADD files /root/spark_app_example_sparkpi_cluster_files
 
-CMD ["/root/spark_app_example_sparkpi_oncluster_files/default_cmd"]
+CMD ["/root/spark_app_example_sparkpi_cluster_files/default_cmd"]

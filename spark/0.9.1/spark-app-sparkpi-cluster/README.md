@@ -1,7 +1,7 @@
-spark-app-example-sparkpi
+spark-app-sparkpi-cluster
 ============
 
-Image for Spark application example: SparkPi.
+Image for standalone Spark application SparkPi in cluster deploy mode.
 
 Usage
 -----
@@ -17,6 +17,10 @@ Start [spark-worker](../../spark-worker)
 * Set `SPARK_MASTER_PORT`, e.g. "7077".
 * Set `SPARK_PUBLIC_DNS`, e.g. "\`curl http://169.254.169.254/latest/meta-data/public-hostname`".
 * Set `SPARK_UI_PORT` for `SPARK_JAVA_OPTS`, e.g. "4040", which becomes "-Dspark.ui.port=4040".
+* Set `AWS_ACCESS_KEY_ID`
+* Set `AWS_SECRET_ACCESS_KEY`
+
+Note: no port-forwarding for `spark.ui.port` will be set up.
 
 ```bash
 $ DNS_SERVER=
@@ -31,6 +35,7 @@ $ sudo docker run -d\
   -e "SPARK_MASTER_PORT=$SPARK_MASTER_PORT"\
   -e "SPARK_PUBLIC_DNS=$SPARK_PUBLIC_DNS"\
   -e "SPARK_JAVA_OPTS=$SPARK_JAVA_OPTS"\
-  -p $SPARK_UI_PORT:$SPARK_UI_PORT\
-  lijin/spark-app-example-sparkpi:0.9.1
+  -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"\
+  -e "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY"\
+  lijin/spark-app-sparkpi-cluster:0.9.1
 ```

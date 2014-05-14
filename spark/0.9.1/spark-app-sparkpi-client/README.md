@@ -1,7 +1,7 @@
-spark-app-sparkpi-standalone
+spark-app-sparkpi-client
 ============
 
-Image for Spark standalone application: SparkPi.
+Image for standalone Spark application SparkPi in client deploy mode.
 
 Usage
 -----
@@ -32,5 +32,5 @@ $ sudo docker run -d\
   -e "SPARK_PUBLIC_DNS=$SPARK_PUBLIC_DNS"\
   -e "SPARK_JAVA_OPTS=$SPARK_JAVA_OPTS"\
   -p $SPARK_UI_PORT:$SPARK_UI_PORT\
-  lijin/spark-app-sparkpi-standalone:0.9.1
+  lijin/spark-app-sparkpi-client:0.9.1
 ```

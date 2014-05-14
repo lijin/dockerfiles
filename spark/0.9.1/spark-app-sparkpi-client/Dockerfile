@@ -1,4 +1,4 @@
-# Spark standalone application: SparkPi
+# Spark standalone application SparkPi in client deploy mode
 #
 FROM lijin/spark-base:0.9.1
 
@@ -13,6 +13,6 @@ FROM lijin/spark-base:0.9.1
 # Not used
 # ENV SPARK_LOCAL_IP
 
-ADD files /root/spark_app_sparkpi_standalone_files
+ADD files /root/spark_app_sparkpi_client_files
 
-CMD ["/root/spark_app_sparkpi_standalone_files/default_cmd"]
+CMD ["/root/spark_app_sparkpi_client_files/default_cmd"]

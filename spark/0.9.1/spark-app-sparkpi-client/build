@@ -1,1 +1,1 @@
-sudo docker build -t lijin/spark-app-sparkpi-standalone:0.9.1 .
+sudo docker build -t lijin/spark-app-sparkpi-client:0.9.1 .
