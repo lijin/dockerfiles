@@ -12,13 +12,9 @@ echo "Container IP=$IP"
 curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/zones/myZone/$IP/`hostname -f`
 curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/reload
 
-# Start standalone Spark application: SparkPi
+# Start Spark application example: SparkPi
 echo "starting SparkPi"
-
-CLASSPATH=`$SPARK_HOME/bin/compute-classpath.sh`
-CLASSPATH=/root/spark_app_sparkpi_standalone_files/SparkPi-assembly-1.0.jar:$CLASSPATH
-echo $CLASSPATH
-java -cp "$CLASSPATH" SparkPi spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
+$SPARK_HOME/bin/spark-class org.apache.spark.deploy.Client launch spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT s3n://$AWS_ACCESS_KEY_ID:$AWS_SECRET_ACCESS_KEY@spark-app/SparkPi/SparkPi-assembly-1.0.jar SparkPi spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
 
 while [ 1 ];
 do

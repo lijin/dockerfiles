@@ -1,0 +1,28 @@
+#!/bin/bash
+
+env
+
+/usr/sbin/sshd
+
+IP=$(ip -o -4 addr list eth0 | perl -n -e 'if (m{inet\s([\d\.]+)\/\d+\s}xms) { print $1 }')
+echo "Container IP=$IP"
+
+# Update DNS
+#curl -X DELETE http://$DNS_SERVER/dnsmasq-rest-api/zones/myZone
+curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/zones/myZone/$IP/`hostname -f`
+curl -X POST http://$DNS_SERVER/dnsmasq-rest-api/reload
+
+# Start standalone Spark application: SparkPi
+echo "starting SparkPi"
+
+CLASSPATH=`$SPARK_HOME/bin/compute-classpath.sh`
+CLASSPATH=/root/spark_app_sparkpi_standalone_files/SparkPi-assembly-1.0.jar:$CLASSPATH
+echo $CLASSPATH
+
+JAVA_OPTS="$SPARK_JAVA_OPTS"
+java -cp "$CLASSPATH" $JAVA_OPTS SparkPi spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
+
+while [ 1 ];
+do
+        sleep 10
+done
