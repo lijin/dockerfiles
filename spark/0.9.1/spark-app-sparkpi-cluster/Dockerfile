@@ -13,6 +13,6 @@ FROM lijin/spark-base:0.9.1
 # Not used
 # ENV SPARK_LOCAL_IP
 
-ADD files /root/spark_app_example_sparkpi_cluster_files
+ADD files /root/spark_app_sparkpi_cluster_files
 
-CMD ["/root/spark_app_example_sparkpi_cluster_files/default_cmd"]
+CMD ["/root/spark_app_sparkpi_cluster_files/default_cmd"]
