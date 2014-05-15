@@ -1,0 +1,389 @@
+{
+  "AWSTemplateFormatVersion":"2010-09-09",
+  "Description":"AWS CloudFormation Template Spark in VPC.",
+  "Parameters":{
+    "SparkMasterInstanceType":{
+      "Description":"EC2 instance type for the master",
+      "Type":"String",
+      "Default":"m1.small",
+      "AllowedValues":[
+        "t1.micro", "m1.small", "m3.large", "m3.xlarge", "m3.2xlarge",
+        "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "hs1.8xlarge"
+      ],
+      "ConstraintDescription":"must be a valid EC2 instance type.",
+      "Default":"m1.small"
+    },
+    "SparkWorkerInstanceType":{
+      "Description":"EC2 instance type for the worker",
+      "Type":"String",
+      "Default":"m1.small",
+      "AllowedValues":[
+        "t1.micro", "m1.small", "m3.large", "m3.xlarge", "m3.2xlarge",
+        "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "hs1.8xlarge"
+      ],
+      "ConstraintDescription":"must be a valid EC2 instance type.",
+      "Default":"m1.small"
+    },
+    "SparkMasterPort":{
+      "Description":"Port for the master (default: 7077).",
+      "Type":"String",
+      "Default":"7077"
+    },
+    "SparkMasterWebuiPort":{
+      "Description":"Port for the master web UI (default: 8080).",
+      "Type":"String",
+      "Default":"8080"
+    },
+    "SparkWorkerWebuiPort":{
+      "Description":"Port for the worker web UI (default: 8081).",
+      "Type":"String",
+      "Default":"8081"
+    },
+    "SparkWorkerCount":{
+      "Description":"Number of Spark workers",
+      "Type":"String",
+      "Default":"2"
+    },
+    "KeyName":{
+      "Description":"Name of an existing EC2 KeyPair to enable SSH access to the instance",
+      "Type":"String",
+      "MinLength":"1",
+      "MaxLength":"255",
+      "AllowedPattern":"[\\x20-\\x7E]*",
+      "ConstraintDescription":"can contain only ASCII characters.",
+      "Default":"aws-ec2-keypair-ap-southeast-2"
+    },
+    "AccessControl" : {
+      "Description" : "The IP address range that can be used to access the Spark cluster.",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x.",
+      "Default": "0.0.0.0/0"
+    },
+    "VpcCidrBlock" :{
+      "Description" : "The CIDR block you want the VPC to cover. (default: 10.0.0.0/16).",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x.",      
+      "Default": "10.0.0.0/16"
+    },
+    "PublicSubnetCidrBlock" :{
+      "Description" : "The CIDR block that you want the subnet to cover (edfault: 10.0.0.0/24).",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x.",      
+      "Default": "10.0.0.0/24"      
+    }
+  },
+  "Mappings":{
+    "RegionMap":{
+      "ap-southeast-2":{ "64":"ami-43128a79" }
+    }
+  },
+  "Resources":{
+    "VPC":{
+      "Type":"AWS::EC2::VPC",
+      "Properties":{
+        "CidrBlock":{ "Ref":"VpcCidrBlock" },
+        "Tags":[
+          { "Key":"Application", "Value":{ "Ref":"AWS::StackId" } }
+        ],
+        "EnableDnsSupport":"true",
+        "EnableDnsHostnames":"true"
+      }
+    },
+    "PublicSubnet":{
+      "Type":"AWS::EC2::Subnet",
+      "Properties":{
+        "VpcId":{ "Ref":"VPC" },
+        "CidrBlock":{ "Ref":"PublicSubnetCidrBlock" },
+        "Tags":[
+          { "Key":"Application", "Value":{ "Ref":"AWS::StackId" } }
+        ]
+      }
+    },
+    "InternetGateway":{
+      "Type":"AWS::EC2::InternetGateway",
+      "Properties":{
+        "Tags":[
+          { "Key":"Application", "Value":{ "Ref":"AWS::StackId" } }
+        ]
+      }
+    },
+    "AttachGateway":{
+      "Type":"AWS::EC2::VPCGatewayAttachment",
+      "Properties":{
+        "VpcId":{ "Ref":"VPC" },
+        "InternetGatewayId":{ "Ref":"InternetGateway" }
+      }
+    },
+    "PublicRouteTable":{
+      "Type":"AWS::EC2::RouteTable",
+      "Properties":{
+        "VpcId":{ "Ref":"VPC" },
+        "Tags":[
+          { "Key":"Application", "Value":{ "Ref":"AWS::StackId" } }
+        ]
+      }
+    },
+    "PublicRoute":{
+      "Type":"AWS::EC2::Route",
+      "DependsOn":"AttachGateway",
+      "Properties":{
+        "RouteTableId":{ "Ref":"PublicRouteTable" },
+        "DestinationCidrBlock":"0.0.0.0/0",
+        "GatewayId":{ "Ref":"InternetGateway" }
+      }
+    },
+    "PublicSubnetRouteTableAssociation":{
+      "Type":"AWS::EC2::SubnetRouteTableAssociation",
+      "Properties":{
+        "SubnetId":{ "Ref":"PublicSubnet" },
+        "RouteTableId":{ "Ref":"PublicRouteTable" }
+      }
+    },
+    
+    
+    
+    "SparkMasterInstance":{
+      "Type":"AWS::EC2::Instance",
+      "Metadata" : {
+        "Comment" : "Starts Docker container Spark Master",
+        "AWS::CloudFormation::Init" : {}
+      },
+      "DependsOn" : "AttachGateway",
+      "Properties":{
+        "ImageId":{ "Fn::FindInMap":[ "RegionMap", { "Ref":"AWS::Region" }, "64" ] },
+        "InstanceType":{ "Ref":"SparkMasterInstanceType" },
+        "KeyName":{ "Ref":"KeyName" },
+        "NetworkInterfaces" : [{
+          "GroupSet"                 : [
+                                         { "Ref":"InstanceSecurityGroup" },
+                                         { "Ref":"SparkMasterSecurityGroup" }
+                                       ],
+          "AssociatePublicIpAddress" : "true",
+          "DeviceIndex"              : "0",
+          "DeleteOnTermination"      : "true",
+          "SubnetId"                 : { "Ref" : "PublicSubnet" }
+        }],
+        "Tags":[
+          { "Key":"Application", "Value":{ "Ref":"AWS::StackId" } }
+        ],
+        "UserData":{
+          "Fn::Base64":{
+            "Fn::Join":[ "", [
+              "#!/bin/bash -ex\n",
+              "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console)\n",
+              "date '+%Y-%m-%d %H:%M:%S'\n",
+              "#Install aws-cfn-bootstrap\n",
+              "apt-get -y install python-setuptools\n",
+              "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+              "cfn-init -v ",
+              "         -s ", { "Ref" : "AWS::StackName" },
+              "         -r SparkMasterInstance ",
+              "         --region ", { "Ref" : "AWS::Region" }, "\n",
+              "# Install docker\n",
+              "bash <(curl -s https://get.docker.io)\n",
+              "# Update Spark Master\n",
+              "DOCKER_IMAGE=lijin/spark-master:0.9.1\n",
+              "docker pull $DOCKER_IMAGE\n",
+              "# Start Spark Master\n",
+              "MASTER_FQDN=`curl http://169.254.169.254/latest/meta-data/hostname`\n",
+              "SPARK_PUBLIC_DNS=`curl http://169.254.169.254/latest/meta-data/public-hostname`\n",
+              "sudo docker run -d --net=host\\\n",
+              "  -e \"SPARK_MASTER_IP=$MASTER_FQDN\"\\\n",
+              "  -e \"SPARK_MASTER_PORT=", { "Ref":"SparkMasterPort" }, "\"\\\n",
+              "  -e \"SPARK_MASTER_WEBUI_PORT=", { "Ref":"SparkMasterWebuiPort" }, "\"\\\n",
+              "  -e \"SPARK_PUBLIC_DNS=$SPARK_PUBLIC_DNS\"\\\n",
+              "  -e \"SSHD_PORT=2222\"\\\n",
+              "  $DOCKER_IMAGE\n",
+              "# All done so signal\n",
+              "cfn-signal -e $? -r \"Spark Master setup complete\" '", { "Ref" : "SparkMasterWaitHandle" }, "'\n"
+            ] ]
+          }
+        }
+      }
+    },
+    "SparkMasterWaitHandle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle"
+    },
+    "SparkMasterWaitCondition" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "DependsOn" : "SparkMasterInstance",
+      "Properties" : {
+        "Handle" : {"Ref" : "SparkMasterWaitHandle"},
+        "Timeout" : "600"
+      }
+    },
+    
+    
+    
+    "SparkWorkerGroup":{
+      "UpdatePolicy" :{
+        "AutoScalingRollingUpdate" : {
+          "MaxBatchSize" : { "Ref":"SparkWorkerCount" },
+          "MinInstancesInService" : 0,
+          "PauseTime" : "PT0S"
+        }
+      }, 
+      "Type":"AWS::AutoScaling::AutoScalingGroup",
+      "Properties":{
+        "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
+        "VPCZoneIdentifier" : [ { "Ref":"PublicSubnet" } ],
+        "DesiredCapacity" : { "Ref":"SparkWorkerCount" },
+        "LaunchConfigurationName" : { "Ref":"SparkWorkerLaunchConfig" },
+        "MinSize" : { "Ref":"SparkWorkerCount" },
+        "MaxSize" : { "Ref":"SparkWorkerCount" }
+      }
+    },
+    "SparkWorkerLaunchConfig":{
+      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+      "Properties" : {
+        "AssociatePublicIpAddress" : true,
+        "ImageId":{ "Fn::FindInMap":[ "RegionMap", { "Ref":"AWS::Region" }, "64" ] },
+        "InstanceType":{ "Ref":"SparkWorkerInstanceType" },
+        "KeyName":{ "Ref":"KeyName" },
+        "SecurityGroups":[
+          { "Ref":"InstanceSecurityGroup" },
+          { "Ref":"SparkWorkerSecurityGroup" }
+        ],
+        "UserData" : {
+          "Fn::Base64":{
+            "Fn::Join":[ "", [
+              "#!/bin/bash -ex\n",
+              "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console)\n",
+              "date '+%Y-%m-%d %H:%M:%S'\n",
+              "#Install aws-cfn-bootstrap\n",
+              "apt-get -y install python-setuptools\n",
+              "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+              "cfn-init -v ",
+              "         -s ", { "Ref" : "AWS::StackName" },
+              "         -r SparkMasterInstance ",
+              "         --region ", { "Ref" : "AWS::Region" }, "\n",
+              "# Install docker\n",
+              "bash <(curl -s https://get.docker.io)\n",
+              "# Update Spark Master\n",
+              "DOCKER_IMAGE=lijin/spark-worker:0.9.1\n",
+              "docker pull $DOCKER_IMAGE\n",
+              "# Start Spark Worker\n",
+              "MASTER_FQDN=", { "Fn::GetAtt" : [ "SparkMasterInstance", "PrivateDnsName" ] }, "\n",
+              "SPARK_PUBLIC_DNS=`curl http://169.254.169.254/latest/meta-data/public-hostname`\n",
+              "sudo docker run -d --net=host\\\n",
+              "  -e \"SPARK_MASTER_IP=$MASTER_FQDN\"\\\n",
+              "  -e \"SPARK_MASTER_PORT=", { "Ref":"SparkMasterPort" }, "\"\\\n",
+              "  -e \"SPARK_WORKER_WEBUI_PORT=", { "Ref":"SparkWorkerWebuiPort" }, "\"\\\n",
+              "  -e \"SPARK_PUBLIC_DNS=$SPARK_PUBLIC_DNS\"\\\n",
+              "  -e \"SSHD_PORT=2222\"\\\n",
+              "  $DOCKER_IMAGE\n",
+              "# All done so signal\n",
+              "cfn-signal -e $? -r \"Spark Worker $HOSTNAME setup complete\" '", { "Ref" : "SparkWorkerWaitHandle" }, "'\n"
+            ] ]
+          }
+        }
+      },
+      "DependsOn" : ["AttachGateway", "SparkMasterWaitCondition"]
+    },
+    "SparkWorkerWaitHandle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle"
+    },
+    "SparkWorkerWaitCondition" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "DependsOn" : "SparkWorkerGroup",
+      "Properties" : {
+        "Handle" : {"Ref" : "SparkWorkerWaitHandle"},
+        "Timeout" : "600"
+      }
+    },    
+    
+    
+    "SparkMasterSecurityGroup":{
+      "Type":"AWS::EC2::SecurityGroup",
+      "Properties":{
+        "GroupDescription" : "Security Group for Spark Master",
+        "VpcId":{ "Ref":"VPC" },        
+        "SecurityGroupIngress":[
+          {
+            "IpProtocol":"tcp",
+            "FromPort":{ "Ref":"SparkMasterWebuiPort" },
+            "ToPort":{ "Ref":"SparkMasterWebuiPort" },
+            "CidrIp":{ "Ref":"AccessControl" }
+          }
+        ]
+      }
+    },
+    "SparkWorkerSecurityGroup":{
+      "Type":"AWS::EC2::SecurityGroup",
+      "Properties":{
+        "GroupDescription" : "Security Group for Spark Worker",
+        "VpcId":{ "Ref":"VPC" },        
+        "SecurityGroupIngress":[
+          {
+            "IpProtocol":"tcp",
+            "FromPort":{ "Ref":"SparkWorkerWebuiPort" },
+            "ToPort":{ "Ref":"SparkWorkerWebuiPort" },
+            "CidrIp":{ "Ref":"AccessControl" }
+          }
+        ]
+      }
+    },
+    
+    "InstanceSecurityGroup":{
+      "Type":"AWS::EC2::SecurityGroup",
+      "Properties":{
+        "GroupDescription":"Enable SSH ingress and SSH and HTTP(S) outgress",
+        "VpcId":{ "Ref":"VPC" },
+        "SecurityGroupIngress":[
+          {
+            "IpProtocol":"tcp",
+            "FromPort":"22",
+            "ToPort":"22",
+            "CidrIp":{ "Ref":"AccessControl" }
+          },
+          {
+            "IpProtocol":"-1",
+            "FromPort":"0",
+            "ToPort":"65535",
+            "CidrIp":{ "Ref":"PublicSubnetCidrBlock" }
+          }
+        ],
+        "SecurityGroupEgress":[
+          {
+            "IpProtocol":"tcp",
+            "FromPort":"80",
+            "ToPort":"80",
+            "CidrIp":"0.0.0.0/0"
+          },
+          {
+            "IpProtocol":"tcp",
+            "FromPort":"443",
+            "ToPort":"443",
+            "CidrIp":"0.0.0.0/0"
+          },
+          {
+            "IpProtocol":"tcp",
+            "FromPort":"22",
+            "ToPort":"22",
+            "CidrIp":"0.0.0.0/0"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs":{
+    "SparkMasterWebUI":{
+      "Description" : "Web UI of the Spark Master",
+      "Value":{ "Fn::Join" : [ "", [
+        "http://",
+        {"Fn::GetAtt" : ["SparkMasterInstance", "PublicDnsName"]},
+        ":",
+        { "Ref":"SparkMasterWebuiPort" }
+      ] ] }
+    }
+  }
+}
