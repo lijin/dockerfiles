@@ -1,0 +1,1 @@
+sudo docker build -t lijin/spark-base:1.0.0 .

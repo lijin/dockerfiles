@@ -1,0 +1,15 @@
+#!/bin/bash
+
+env
+
+/usr/sbin/sshd -p $SSHD_PORT
+
+# Start Spark Master
+echo "starting Spark Master"
+$SPARK_HOME/sbin/start-master.sh
+
+while [ 1 ];
+do
+	tail -f $SPARK_HOME/logs/*.out
+        sleep 10
+done

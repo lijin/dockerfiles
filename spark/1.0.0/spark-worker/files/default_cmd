@@ -1,0 +1,16 @@
+#!/bin/bash
+
+env
+
+/usr/sbin/sshd -p $SSHD_PORT
+
+# Start Spark Worker
+echo "starting Spark Worker"
+#ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+$SPARK_HOME/sbin/start-slave.sh 1 spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
+
+while [ 1 ];
+do
+	tail -f $SPARK_HOME/logs/*.out
+        sleep 10
+done
