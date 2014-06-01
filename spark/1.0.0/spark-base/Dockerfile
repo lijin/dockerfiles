@@ -3,24 +3,20 @@
 #
 FROM lijin/openjdk-7-jre-headless:precise
 
-ENV SCALA_VERSION 2.10.3
-ENV SPARK_VERSION 1.0.0-snapshot
+#ENV SCALA_VERSION 2.10.4
+ENV SPARK_VERSION 1.0.0
 # hadoop1, cdh4, hadoop2
-ENV SPARK_BIN_VERSION hadoop1
-#ENV SCALA_HOME /opt/scala-$SCALA_VERSION
+ENV SPARK_HDP_VERSION hadoop2
 ENV SPARK_HOME /opt/spark-$SPARK_VERSION
 
 RUN apt-get install -y wget
 
-# Install Scala
-#RUN (cd / && wget -q http://www.scala-lang.org/files/archive/scala-$SCALA_VERSION.tgz && gunzip < scala-$SCALA_VERSION.tgz)|(cd /opt && tar -xvf - && rm /scala-$SCALA_VERSION.tgz)
-
 # Install Spark
-Add /spark/dist /opt/spark-1.0.0-snapshot
+RUN wget -q http://d3kbcqa49mib13.cloudfront.net/spark-$SPARK_VERSION-bin-$SPARK_HDP_VERSION.tgz -O - | tar -xvz -C /opt && ln -s /opt/spark-$SPARK_VERSION-bin-$SPARK_HDP_VERSION /opt/spark-$SPARK_VERSION
 
 # Add Spark config files and configure script
 ADD files /root/spark_files
-RUN cd / && cp /root/spark_files/conf/* /opt/spark-$SPARK_VERSION/conf/
+RUN cp /root/spark_files/conf/* /opt/spark-$SPARK_VERSION/conf/
 
 # Setup sshd
 RUN apt-get install -y openssh-server
