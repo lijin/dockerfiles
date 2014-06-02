@@ -6,8 +6,22 @@ env
 
 # Start Spark Worker
 echo "starting Spark Worker"
+
 #ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-$SPARK_HOME/sbin/start-slave.sh 1 spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
+#$SPARK_HOME/sbin/start-slaves.sh
+
+# Extracted from sbin/start-slaves.sh to obviate the need for SSH server
+# Launch the slaves
+if [ "$SPARK_WORKER_INSTANCES" = "" ]; then
+  $SPARK_HOME/sbin/start-slave.sh 1 spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
+else
+  if [ "$SPARK_WORKER_WEBUI_PORT" = "" ]; then
+    SPARK_WORKER_WEBUI_PORT=8081
+  fi
+  for ((i=0; i<$SPARK_WORKER_INSTANCES; i++)); do
+    $SPARK_HOME/sbin/start-slave.sh $(( $i + 1 ))  spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT --webui-port $(( $SPARK_WORKER_WEBUI_PORT + $i ))
+  done
+fi
 
 while [ 1 ];
 do
